@@ -1,16 +1,18 @@
 // ==UserScript==
-// @name         Разговоры о важном - Скачать все видео
-// @namespace    http://tampermonkey.net/
-// @version      2024-12-23
-// @description  Скачивание всех видео с сайта "Разговоры о важном" для телевизора в СПО, включая видео-архивы с Яндекс.Диска.
-// @author       xenongee
-// @homepageURL  
-// @updateURL    
-// @downloadURL  
-// @match        https://razgovor.edsoo.ru/topic/*/
-// @match        https://disk.yandex.ru/d/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=edsoo.ru
-// @grant        window.close
+// @name         	razgovor.edsoo.ru - Download all videos
+// @name:ru      	Разговоры о важном (https://razgovor.edsoo.ru/) - Скачать все видео
+// @description  	Downloading all videos from the site “Talking About Important”, including video archives from Yandex.Disk.
+// @description:ru  Скачивание видео с сайта "Разговоры о важном" на конкретном топике\дне, включая видео-архивы с Яндекс.Диска.
+// @author       	xenongee
+// @version      	2024-12-23
+// @icon         	https://www.google.com/s2/favicons?sz=64&domain=edsoo.ru
+// @namespace    	http://tampermonkey.net/
+// @homepageURL  	https://github.com/xnngee/important-talks-video-downloader
+// @updateURL    	https://github.com/xnngee/important-talks-video-downloader/raw/refs/heads/main/important-talks-video-downloader.user.js
+// @downloadURL  	https://github.com/xnngee/important-talks-video-downloader/raw/refs/heads/main/important-talks-video-downloader.user.js
+// @match        	https://razgovor.edsoo.ru/topic/*/
+// @match        	https://disk.yandex.ru/d/*
+// @grant        	window.close
 // ==/UserScript==
 
 (function() {
