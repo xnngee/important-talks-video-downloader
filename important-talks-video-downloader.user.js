@@ -1,17 +1,16 @@
 // ==UserScript==
-// @name         	razgovor.edsoo.ru - Download all videos
-// @name:ru      	Разговоры о важном (https://razgovor.edsoo.ru/) - Скачать все видео
-// @description  	Downloading all videos from the site “Talking About Important”, including video archives from Yandex.Disk.
-// @description:ru  Скачивание видео с сайта "Разговоры о важном" на конкретном топике\дне, включая видео-архивы с Яндекс.Диска.
+// @name         	разговорыоважном.рф - Download all videos
+// @name:ru      	Разговоры о важном (https://разговорыоважном.рф/) - Скачать все видео
+// @description  	Downloading all videos from the site “Talking About Important”.
+// @description:ru  Скачивание видео с сайта "Разговоры о важном" на конкретном топике\дне.
 // @author       	xenongee
-// @version      	2024-12-23
-// @icon         	https://www.google.com/s2/favicons?sz=64&domain=edsoo.ru
+// @version      	2025-01-20
 // @namespace    	http://tampermonkey.net/
 // @homepageURL  	https://github.com/xnngee/important-talks-video-downloader
 // @updateURL    	https://github.com/xnngee/important-talks-video-downloader/raw/refs/heads/main/important-talks-video-downloader.user.js
 // @downloadURL  	https://github.com/xnngee/important-talks-video-downloader/raw/refs/heads/main/important-talks-video-downloader.user.js
-// @match        	https://razgovor.edsoo.ru/topic/*/
-// @match        	https://disk.yandex.ru/d/*
+// @icon            https://www.google.com/s2/favicons?sz=64&domain=xn--80aafadvc9bifbaeqg0p.xn--p1ai
+// @match           https://xn--80aafadvc9bifbaeqg0p.xn--p1ai/*
 // @grant        	window.close
 // ==/UserScript==
 
@@ -25,151 +24,45 @@
 
     function downloadButtons() {
         document.body.insertAdjacentHTML('afterbegin', `
-            <div style="display: flex; justify-content: center; padding: 10px; background-color: #333; gap: 15px;">
-                <span style="color: white; padding-top: 2px;">Скачать все видео:</span>
-                <a id="alldownload" style="color: white; text-decoration: none; display: flex; gap: 5px" href="#">
+            <div style="display: flex; justify-content: center; padding: 10px; background-color: #333; gap: 15px; position: fixed; bottom: 20px; right: 90px; border-radius: 50px; height: 50px; align-items: center;">
+                <a id="download_videos" style="color: white; text-decoration: none; display: flex; gap: 5px; padding-top:1px;" href="#">
                     ${downloadSVG}
-                    <span style="padding-top: 2px;">Напрямую с сайта <small>(рекомендуется, многие видео с веб-качеством)</small></span>
-                </a>
-                <a id="alldownload_yandex" style="color: white; text-decoration: none; display: flex; gap: 5px" href="#">
-                    ${downloadSVG}
-                    <span style="padding-top: 2px;">Яндекс.Диск <small>(альтернативный способ, встречаются видео с оригинальным качеством)</small></span>
+                    <span>Скачать все видео</span>
                 </a>
             </div>
         `);
 
-        document.getElementById("alldownload_yandex").addEventListener("click", (e) => {
-            alert("Сейчас откроются вкладки с Яндекс.Диском, не закрывайте их! Скрипт обработает эти страницы, скачает архивы с видео и закроет их самостоятельно.");
-            document.querySelectorAll(".topic-resource-download a").forEach((e, i) => {
-                window.open(e.href, '_blank' + i)
-            });
-        });
+        document.getElementById("download_videos").addEventListener("click", e => {
+            const materialItems = document.querySelectorAll(`.materials-section .materials-content .materials-column:nth-child(2) .material-item`);
 
-        document.getElementById("alldownload").addEventListener("click", e => {
-            const videoLinks = Array.from(document.querySelectorAll(".topic-resource-group-columns .column a"))
-                .filter(e => e.href.includes("/video/"))
-                .map(e => e.href);
+            const videoLinks = [];
+            const uniqueHref = new Set();
 
-            alert("Сейчас откроются вкладки с видео, не закрывайте их! Скрипт обработает эти страницы, скачает видео и закроет их самостоятельно.");
-
-            const downloadedFiles = new Set();
-            videoLinks.forEach((link, index) => {
-                const newWindow = window.open(link, '_blank' + index);
-                newWindow.onload = () => {
-                    const videoPlayer = newWindow.document.getElementById('player');
-                    if (videoPlayer) {
-                        const source = videoPlayer.querySelector('source');
-                        if (source) {
-                            // Получаем имя файла из URL
-                            const fileName = source.src.split('/').pop();
-                            // Скачать ресурс по ссылке из src
-                            fetch(source.src)
-                                .then(response => response.blob())
-                                .then(blob => {
-                                    // Проверяем, скачивался ли уже файл с таким именем
-                                    if (downloadedFiles.has(fileName)) {
-                                        console.warn(`Файл ${fileName} уже скачан. Пропускаем.`);
-                                        newWindow.close();
-                                        return;
-                                    }
-                                    // Создаем ссылку для скачивания
-                                    const url = window.URL.createObjectURL(blob);
-                                    //const a = newWindow.document.body.insertAdjacentHTML('afterbegin', `
-                                    //<div style="display: flex; justify-content: center; padding: 10px; background-color: #333; gap: 15px; position: absolute; top: 0; left: 0; width: 100%;">
-                                    //    <a style="color: white; text-decoration: none; display:" href=${url} download=${fileName}>
-                                    //        ${downloadSVG}
-                                    //        <span style="color: white; padding-top: 2px; font-family">Скачать видео</span>
-                                    //    </a>
-                                    //</div>`);
-                                    const a = newWindow.document.createElement('a');
-                                    a.href = url;
-                                    a.download = fileName;
-                                    a.innerHTML = "Скачать видео";
-                                    newWindow.document.body.appendChild(a);
-                                    a.click();
-                                    console.log('Скачиваем видео:', fileName);
-                                    window.URL.revokeObjectURL(url);
-                                    // Добавляем имя файла в список скачанных
-                                    downloadedFiles.add(fileName);
-                                    // Закрыть вкладку
-                                    setTimeout(() => {
-                                        newWindow.close();
-                                    }, 1000);
-                                })
-                                .catch(error => {
-                                    console.error('Ошибка при скачивании видео:', error);
-                                    newWindow.close();
-                                });
-                        } else {
-                            console.error("Тег <source> не найден");
-                            newWindow.close();
+            materialItems.forEach(item => {
+                const strongElement = item.querySelector('strong');
+                if (strongElement && strongElement.textContent.trim() === 'Видео') {
+                    const downloadLinks = item.querySelectorAll('a[download]');
+                    downloadLinks.forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (!uniqueHref.has(href)) {
+                            uniqueHref.add(href);
+                            videoLinks.push(link);
                         }
-                    } else {
-                        console.error("Тег <video> с id 'player' не найден");
-                        newWindow.close();
-                    }
+                    });
                 }
             });
+
+            if (videoLinks.length > 0) {
+                if (confirm(`Скачать ${videoLinks.length} видео?`)) {
+                    videoLinks.forEach(link => {
+                        link.click();
+                    });
+                }
+            } else {
+                alert('Видео для скачивания не найдены.');
+            }
         });
     }
 
-    function downloadButtonYandexDisk() {
-        // Ручной способ
-        document.body.insertAdjacentHTML( 'afterbegin', `
-            <div id="alldownload" style="display: flex; justify-content: center; padding: 10px; background-color: #333; gap: 15px;">
-                <a id="alldownload" style="color: white; text-decoration: none; display: flex; gap: 5px" href="#">
-                    ${downloadSVG}
-                    <span style="padding-top: 2px;">Нажмите сюда, если не началось автоматическое скачивание архива с видео</small></span>
-                </a>
-            </div>
-        `);
-        document.getElementById("alldownload").addEventListener("click", (e) => {
-            document.querySelectorAll(".listing__items .listing-item").forEach(e => {
-                const titleSpan = e.querySelector(".listing-item__info .listing-item__title span");
-                if (titleSpan && titleSpan.innerHTML.toLowerCase().includes("3 видео")) {
-                    e.click();
-                }
-            });
-            document.querySelector(".resources-action-bar__side-right .download-button").click();
-        })
-    }
-
-    function autoDownloadYandexDisk() {
-        // Автоматический способ
-        let attempts = 0;
-        const maxAttempts = 3; // Максимальное количество попыток
-        const interval = 500; // Интервал между попытками
-
-        const findAndDownload = setInterval(() => {
-            attempts++;
-            const items = document.querySelectorAll(".listing__items .listing-item");
-            items.forEach(item => {
-                const titleSpan = item.querySelector(".listing-item__info .listing-item__title span");
-                if (titleSpan && (titleSpan.innerHTML.trim().toLowerCase() === "3 видео")) {
-                    item.click();
-                    setTimeout(()=> {
-                        document.querySelector(".resources-action-bar__side-right .download-button").click();
-                    }, 500);
-                    setTimeout(()=> {
-                        window.close();
-                    }, 5000);
-                    clearInterval(findAndDownload);
-                }
-            });
-
-            if (attempts >= maxAttempts) {
-                clearInterval(findAndDownload);
-                console.error(">>>> Не удалось найти папку '3 видео' после нескольких попыток.");
-            }
-        }, interval);
-    }
-
-    if (currentURL.startsWith('https://razgovor.edsoo.ru/topic/')) {
-        downloadButtons();
-    }
-
-    if (currentURL.startsWith('https://disk.yandex.ru/d/')) {
-        downloadButtonYandexDisk();
-        autoDownloadYandexDisk();
-    }
+    downloadButtons();
 })();
