@@ -40,14 +40,35 @@
 
             materialItems.forEach(item => {
                 const strongElement = item.querySelector('strong');
-                if (strongElement && strongElement.textContent.trim() === 'Видео') {
+                if (strongElement && strongElement.textContent.trim().includes('Видео')) {
                     const downloadLinks = item.querySelectorAll('a[download]');
                     downloadLinks.forEach(link => {
                         const href = link.getAttribute('href');
+                        if (!href) return;
+
+                        let fileName = decodeURIComponent(href.split('/').pop().split('#')[0].split('?')[0]);
+
+                        const oldInfo = link.querySelector('.v-info-tag');
+                        if (oldInfo) oldInfo.remove();
+
+                        link.style.padding = '2px 4px';
+                        link.style.borderRadius = '4px';
+
+                        const infoSpan = document.createElement('span');
+                        infoSpan.className = 'v-info-tag';
+                        infoSpan.textContent = `[${fileName}]`;
+                        infoSpan.style.fontSize = '10px';
+
                         if (!uniqueHref.has(href)) {
                             uniqueHref.add(href);
                             videoLinks.push(link);
+                            link.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+                            infoSpan.style.color = '#006400';
+                        } else {
+                            link.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+                            infoSpan.style.color = '#8b0000';
                         }
+                        link.appendChild(infoSpan);
                     });
                 }
             });
@@ -55,7 +76,7 @@
             if (videoLinks.length > 0) {
                 if (confirm(`Скачать ${videoLinks.length} видео?`)) {
                     videoLinks.forEach(link => {
-                        link.click();
+                        // link.click();
                     });
                 }
             } else {
