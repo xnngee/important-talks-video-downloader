@@ -76,7 +76,7 @@
             if (videoLinks.length > 0) {
                 if (confirm(`Скачать ${videoLinks.length} видео?`)) {
                     videoLinks.forEach(link => {
-                        // link.click();
+                        link.click();
                     });
                 }
             } else {
