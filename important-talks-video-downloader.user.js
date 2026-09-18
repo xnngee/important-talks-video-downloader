@@ -4,7 +4,7 @@
 // @description  	Downloading all videos from the site “Talking About Important”.
 // @description:ru  Скачивание видео с сайта "Разговоры о важном" на конкретном топике\дне.
 // @author       	xenongee
-// @version      	2025-01-20
+// @version      	2026-09-18
 // @namespace    	http://tampermonkey.net/
 // @homepageURL  	https://github.com/xnngee/important-talks-video-downloader
 // @updateURL    	https://github.com/xnngee/important-talks-video-downloader/raw/refs/heads/main/important-talks-video-downloader.user.js
@@ -24,8 +24,8 @@
 
     function downloadButtons() {
         document.body.insertAdjacentHTML('afterbegin', `
-            <div style="display: flex; justify-content: center; padding: 10px; background-color: #333; gap: 15px; position: fixed; bottom: 20px; right: 90px; border-radius: 50px; height: 50px; align-items: center;">
-                <a id="download_videos" style="color: white; text-decoration: none; display: flex; gap: 5px; padding-top:1px;" href="#">
+            <div style="display: flex; padding-inline: 10px; background-color: #eb058c; position: fixed; bottom: 20rem; right: 80px; border-radius: 12rem; align-items: center; z-index: 10; height: 48rem;">
+                <a id="download_videos" style="color: white; text-decoration: none; display: flex; gap: 5px;" href="#">
                     ${downloadSVG}
                     <span>Скачать все видео</span>
                 </a>
@@ -33,7 +33,16 @@
         `);
 
         document.getElementById("download_videos").addEventListener("click", e => {
-            const materialItems = document.querySelectorAll(`.materials-section .materials-content .materials-column:nth-child(2) .material-item`);
+            e.preventDefault();
+
+            const section = document.getElementById(window.location.hash.slice(1));
+
+            if (!section || !section.classList.contains('materials-section')) {
+                alert('Сначала выберите класс или СПО.');
+                return;
+            }
+
+            const materialItems = section.querySelectorAll(`.materials-content .material-item`);
 
             const videoLinks = [];
             const uniqueHref = new Set();
@@ -46,7 +55,10 @@
                         const href = link.getAttribute('href');
                         if (!href) return;
 
-                        let fileName = decodeURIComponent(href.split('/').pop().split('#')[0].split('?')[0]);
+                        const videoFile = href.split('?')[0].split('#')[0];
+                        if (!/\.(mp4|webm|mov|m4v)$/i.test(videoFile)) return;
+
+                        let fileName = decodeURIComponent(videoFile.split('/').pop());
 
                         const oldInfo = link.querySelector('.v-info-tag');
                         if (oldInfo) oldInfo.remove();
